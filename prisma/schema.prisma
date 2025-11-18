@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(cuid())
+  username String  @unique
+  password String
+  role     Role
+  isRoot   Boolean @default(false)
+  store    Store?
+}
+
+model Store {
+  id                String         @id @default(cuid())
+  name              String
+  slug              String         @unique
+  isActive          Boolean
+  isPremium         Boolean
+  template          TemplateType   @default(fastfood)
+  userId            String         @unique
+  modules           Json           @default("[]")
+  createdAt         DateTime       @default(now())
+  diasFuncionamento Json           @default("[]")
+  endereco          String?
+  facebookLink      String?
+  horarioAbertura   String?
+  horarioFechamento String?
+  instagramLink     String?
+  telefone          String?
+  logoUrl           String?
+  cidade            String?
+  estado            String?
+  agendamentos      Agendamento[]
+  fotosGaleria      GaleriaFoto[]
+  orders            Order[]
+  products          Product[]
+  profissionais     Profissional[]
+  user              User           @relation(fields: [userId], references: [id])
+}
+
+model Product {
+  id          String          @id @default(cuid())
+  title       String
+  description String
+  imageUrl    String
+  price       Float
+  storeId     String
+  promoPrice  Float?
+  category    ProductCategory @default(outro)
+  isSoldOut   Boolean         @default(false)
+  orderItems  OrderItem[]
+  store       Store           @relation(fields: [storeId], references: [id])
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  storeId         String
+  total           Float
+  status          String
+  customerName    String
+  customerPhone   String
+  customerAddress String
+  paymentMethod   String
+  createdAt       DateTime    @default(now())
+  orderNumber     Int         @unique @default(autoincrement())
+  store           Store       @relation(fields: [storeId], references: [id])
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Profissional {
+  id       String  @id @default(cuid())
+  name     String
+  bio      String?
+  imageUrl String?
+  storeId  String
+  store    Store   @relation(fields: [storeId], references: [id])
+}
+
+model Agendamento {
+  id           String   @id @default(cuid())
+  storeId      String
+  clienteNome  String
+  dataHora     DateTime
+  status       String   @default("pendente")
+  profissional String?
+  observacoes  String?
+  customData   Json?
+  store        Store    @relation(fields: [storeId], references: [id])
+}
+
+model GaleriaFoto {
+  id       String  @id @default(cuid())
+  imageUrl String
+  legenda  String?
+  storeId  String
+  store    Store   @relation(fields: [storeId], references: [id])
+}
+
+enum Role {
+  admin
+  client
+}
+
+enum TemplateType {
+  fastfood
+  bar
+  fitness
+  clinica
+  comercio
+  restaurante
+  barbearia
+  pizzaria
+  acai
+}
+
+enum ModuleType {
+  agendamento
+  cardapio
+  profissionais
+  produtos
+  galeria
+}
+
+enum ProductCategory {
+  comida
+  bebida
+  sobremesa
+  outro
+}
+
+enum WeekDay {
+  domingo
+  segunda
+  terca
+  quarta
+  quinta
+  sexta
+  sabado
+}
