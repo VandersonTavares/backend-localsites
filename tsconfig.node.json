@@ -18,5 +18,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["./**/*.ts"]
+  "include": [
+    "./server/**/*.ts",
+    "./prisma/**/*.ts"
+  ]
 }
